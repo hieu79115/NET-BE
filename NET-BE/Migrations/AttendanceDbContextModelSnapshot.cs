@@ -33,10 +33,10 @@ namespace NET_BE.Migrations
                     b.Property<DateTime>("CheckInTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsPresent")
-                        .HasColumnType("bit");
-
                     b.Property<int>("ScheduleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<string>("StudentId")

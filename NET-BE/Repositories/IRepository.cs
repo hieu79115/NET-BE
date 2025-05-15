@@ -1,11 +1,13 @@
-﻿namespace NET_BE.Repositories
+﻿using NET_BE.Model;
+
+namespace NET_BE.Repositories
 {
     public interface IRepository<T> where T : class
     {
-        Task<List<T>> GetAllAsync();
-        Task<T?> GetByIdAsync(int id);
+        Task<PagedModel<T>> GetPagedAsync(int pageIndex, int pageSize);
+        Task<T?> GetByIdAsync(string id);
         Task AddAsync(T entity);
         Task UpdateAsync(T entity);
-        Task DeleteAsync(int id);
+        Task DeleteAsync(string id);
     }
 }

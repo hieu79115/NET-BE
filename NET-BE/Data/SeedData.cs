@@ -274,23 +274,54 @@ public static class SeedData
                                 {
                                     StudentId = student.StudentId,
                                     ScheduleId = schedule.Id,
-                                    IsPresent = true,
-                                    CheckInTime = checkInTime,
+                                    Status = AttendanceStatus.Present,
+                                    CheckInTime = checkInTime
                                 }
                             );
                         }
                         else
                         {
-                            // Absent student record
-                            attendances.Add(
-                                new Attendance
-                                {
-                                    StudentId = student.StudentId,
-                                    ScheduleId = schedule.Id,
-                                    IsPresent = false,
-                                    CheckInTime = DateTime.MinValue, // Default for absent students
-                                }
-                            );
+                            // Randomize attendance status
+                            var status = (AttendanceStatus)random.Next(0, 3); // 0: Present, 1: Absent, 2: ExcusedAbsence
+
+                            if (status == AttendanceStatus.Present)
+                            {
+                                var scheduledTime = DateTime.Parse(schedule.TimeSlot.Split('-')[0]);
+                                var baseHour = scheduledTime.Hour;
+                                var baseMinute = scheduledTime.Minute;
+
+                                // Check-in time (random within 30 minutes before class start)
+                                var checkInTime = new DateTime(
+                                    schedule.Date.Year,
+                                    schedule.Date.Month,
+                                    schedule.Date.Day,
+                                    baseHour,
+                                    baseMinute,
+                                    0
+                                ).AddMinutes(-random.Next(0, 30));
+
+                                attendances.Add(
+                                    new Attendance
+                                    {
+                                        StudentId = student.StudentId,
+                                        ScheduleId = schedule.Id,
+                                        Status = AttendanceStatus.Present,
+                                        CheckInTime = checkInTime
+                                    }
+                                );
+                            }
+                            else
+                            {
+                                attendances.Add(
+                                    new Attendance
+                                    {
+                                        StudentId = student.StudentId,
+                                        ScheduleId = schedule.Id,
+                                        Status = status,
+                                        CheckInTime = DateTime.MinValue, // Default for non-present statuses
+                                    }
+                                );
+                            }
                         }
                     }
                 }

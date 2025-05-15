@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NET_BE.Data;
+using NET_BE.Model;
 
 namespace NET_BE.Repositories
 {
@@ -14,12 +15,19 @@ namespace NET_BE.Repositories
             _context = context;
         }
 
-        public async Task<List<T>> GetAllAsync()
+        public async Task<PagedModel<T>> GetPagedAsync(int pageIndex, int pageSize)
         {
-            return await _context.Set<T>().ToListAsync();
+            var query = _context.Set<T>().AsQueryable();
+            var totalCount = await query.CountAsync();
+            var data = await query
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedModel<T>(totalCount, data, pageIndex, pageSize);
         }
 
-        public async Task<T?> GetByIdAsync(int id)
+        public async Task<T?> GetByIdAsync(string id)
         {
             return await _context.Set<T>().FindAsync(id);
         }
@@ -36,14 +44,16 @@ namespace NET_BE.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(string id)
         {
-            var entity = await GetByIdAsync(id);
-            if (entity != null)
+            var entity = await _context.Set<T>().FindAsync(id);
+            if (entity == null)
             {
-                _context.Set<T>().Remove(entity);
-                await _context.SaveChangesAsync();
+                throw new KeyNotFoundException($"Entity with ID {id} not found.");
             }
+
+            _context.Set<T>().Remove(entity);
+            await _context.SaveChangesAsync();
         }
     }
 }

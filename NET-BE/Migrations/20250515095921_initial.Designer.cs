@@ -12,7 +12,7 @@ using NET_BE.Data;
 namespace NET_BE.Migrations
 {
     [DbContext(typeof(AttendanceDbContext))]
-    [Migration("20250515060450_initial")]
+    [Migration("20250515095921_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -36,10 +36,10 @@ namespace NET_BE.Migrations
                     b.Property<DateTime>("CheckInTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsPresent")
-                        .HasColumnType("bit");
-
                     b.Property<int>("ScheduleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<string>("StudentId")

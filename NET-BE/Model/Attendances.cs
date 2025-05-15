@@ -2,6 +2,12 @@
 
 namespace NET_BE.Model
 {
+    public enum AttendanceStatus
+    {
+        Present,       
+        Absent,         
+        ExcusedAbsence 
+    }
     public class Attendance
     {
         public int Id { get; set; }
@@ -13,9 +19,8 @@ namespace NET_BE.Model
         public int ScheduleId { get; set; }
 
         [Required]
-        public bool IsPresent { get; set; }
+        public AttendanceStatus Status { get; set; }
 
-        [Required]
         public DateTime CheckInTime { get; set; }
 
         public Student Student { get; set; }

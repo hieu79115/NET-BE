@@ -4,14 +4,15 @@ namespace NET_BE.Model
 {
     public class Student
     {
-        public int Id { get; set; }
-        [Required]
-        [MaxLength(20)]
-        public string StudentCode { get; set; }
+        public int StudentId { get; set; }
 
         [Required]
         [MaxLength(100)]
         public string FullName { get; set; }
+
+        [Required]
+        [DataType(DataType.Date)]
+        public DateTime DateOfBirth { get; set; }
 
         [Required]
         [MaxLength(100)]

@@ -6,7 +6,7 @@ namespace NET_BE.Model
     {
         public int Id { get; set; }
         [Required]
-        public int StudentId { get; set; }
+        public string StudentId { get; set; }
 
         [Required]
         public int ClassSubjectId { get; set; }

@@ -4,7 +4,7 @@ namespace NET_BE.Model
 {
     public class Student
     {
-        public int StudentId { get; set; }
+        public string StudentId { get; set; }
 
         [Required]
         [MaxLength(100)]
@@ -24,6 +24,10 @@ namespace NET_BE.Model
 
         [MaxLength(200)]
         public string Address { get; set; }
+
+        [Required]
+        [MaxLength(100)]
+        public string Password { get; set; }
 
         public ICollection<Attendance> Attendances { get; set; }
 

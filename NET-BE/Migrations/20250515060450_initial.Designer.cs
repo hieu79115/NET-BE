@@ -12,7 +12,7 @@ using NET_BE.Data;
 namespace NET_BE.Migrations
 {
     [DbContext(typeof(AttendanceDbContext))]
-    [Migration("20250515025021_initial")]
+    [Migration("20250515060450_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -42,8 +42,9 @@ namespace NET_BE.Migrations
                     b.Property<int>("ScheduleId")
                         .HasColumnType("int");
 
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
+                    b.Property<string>("StudentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -109,8 +110,9 @@ namespace NET_BE.Migrations
                     b.Property<double>("Score")
                         .HasColumnType("float");
 
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
+                    b.Property<string>("StudentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -135,6 +137,11 @@ namespace NET_BE.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Password")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -177,11 +184,8 @@ namespace NET_BE.Migrations
 
             modelBuilder.Entity("NET_BE.Model.Student", b =>
                 {
-                    b.Property<int>("StudentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StudentId"));
+                    b.Property<string>("StudentId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Address")
                         .IsRequired()
@@ -197,6 +201,11 @@ namespace NET_BE.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Password")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");

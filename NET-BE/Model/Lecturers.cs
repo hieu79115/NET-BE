@@ -15,6 +15,10 @@ namespace NET_BE.Model
         [EmailAddress]
         public string Email { get; set; }
 
+        [Required]
+        [MaxLength(100)]
+        public string Password { get; set; }
+
         public ICollection<Schedule> Schedules { get; set; }
     }
 }

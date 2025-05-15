@@ -4,7 +4,7 @@ namespace NET_BE.Model
 {
     public class Subject
     {
-        public int Id { get; set; }
+        public string SubjectId { get; set; }
 
         [Required]
         [MaxLength(100)]

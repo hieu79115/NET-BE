@@ -10,18 +10,18 @@ namespace NET_BE.Model
     }
     public class Attendance
     {
-        public int Id { get; set; }
+        public string AttendanceId { get; set; }
 
         [Required]
         public string StudentId { get; set; }
 
         [Required]
-        public int ScheduleId { get; set; }
+        public string ScheduleId { get; set; }
 
         [Required]
         public AttendanceStatus Status { get; set; }
 
-        public DateTime CheckInTime { get; set; }
+        public DateTime DateTime { get; set; }
 
         public Student Student { get; set; }
         public Schedule Schedule { get; set; }

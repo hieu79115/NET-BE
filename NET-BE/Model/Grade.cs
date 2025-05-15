@@ -4,12 +4,12 @@ namespace NET_BE.Model
 {
     public class Grade
     {
-        public int Id { get; set; }
+        public string GradeId { get; set; }
         [Required]
         public string StudentId { get; set; }
 
         [Required]
-        public int ClassSubjectId { get; set; }
+        public string ClassSubjectId { get; set; }
 
         [Required]
         [Range(0, 10)]

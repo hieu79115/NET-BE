@@ -4,12 +4,12 @@ namespace NET_BE.Model
 {
     public class Schedule
     {
-        public int Id { get; set; }
+        public string ScheduleId { get; set; }
         [Required]
-        public int ClassSubjectId { get; set; }
+        public string ClassSubjectId { get; set; }
 
         [Required]
-        public int LecturerId { get; set; }
+        public string LecturerId { get; set; }
 
         [Required]
         public DateTime Date { get; set; }

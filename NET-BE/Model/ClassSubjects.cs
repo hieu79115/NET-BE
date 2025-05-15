@@ -5,13 +5,13 @@ namespace NET_BE.Model
 {
     public class ClassSubject
     {
-        public int Id { get; set; }
+        public string ClassSubjectId { get; set; }
 
         [Required]
-        public int ClassId { get; set; }
+        public string ClassId { get; set; }
 
         [Required]
-        public int SubjectId { get; set; }
+        public string SubjectId { get; set; }
 
         public Class Class { get; set; }
         public Subject Subject { get; set; }

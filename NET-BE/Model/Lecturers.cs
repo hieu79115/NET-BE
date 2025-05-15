@@ -4,7 +4,7 @@ namespace NET_BE.Model
 {
     public class Lecturer
     {
-        public int Id { get; set; }
+        public string LecturerId { get; set; }
 
         [Required]
         [MaxLength(100)]

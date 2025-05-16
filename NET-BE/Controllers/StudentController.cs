@@ -1,10 +1,10 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using NET_BE.DTOs;
 using NET_BE.Model;
 using NET_BE.Repositories;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace NET_BE.Controllers
 {
@@ -20,7 +20,6 @@ namespace NET_BE.Controllers
         private readonly IRepository<Subject> _subjectRepository;
         private readonly IRepository<Lecturer> _lecturerRepository;
 
-
         public StudentController(
             IRepository<Student> repository,
             IRepository<Enrollment> enrollmentRepository,
@@ -28,7 +27,8 @@ namespace NET_BE.Controllers
             IRepository<Attendance> attendanceRepository,
             IRepository<ClassSubject> classSubjectRepository,
             IRepository<Subject> subjectRepository,
-            IRepository<Lecturer> lectureRepository)
+            IRepository<Lecturer> lectureRepository
+        )
         {
             _repository = repository;
             _enrollmentRepository = enrollmentRepository;
@@ -40,17 +40,37 @@ namespace NET_BE.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetPaged([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetPaged(
+     [FromQuery] int pageIndex = 1,
+     [FromQuery] int pageSize = 10
+ )
         {
             var result = await _repository.GetPagedAsync(pageIndex, pageSize);
-            return Ok(result);
+
+            var dtoResult = new PagedModel<StudentDto>(
+                result.TotalCount,
+                result.Data.Select(student => new StudentDto
+                {
+                    StudentId = student.StudentId,
+                    FullName = student.FullName,
+                    DateOfBirth = student.DateOfBirth,
+                    Email = student.Email,
+                    Phone = student.Phone,
+                    Address = student.Address
+                }),
+                result.PageIndex,
+                result.PageSize
+            );
+
+            return Ok(dtoResult);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<StudentDto>> GetStudent(string id)
         {
             var student = await _repository.GetByIdAsync(id);
-            if (student == null) return NotFound();
+            if (student == null)
+                return NotFound();
 
             var dto = new StudentDto
             {
@@ -63,6 +83,50 @@ namespace NET_BE.Controllers
             };
 
             return Ok(dto);
+        }
+
+        [HttpPut("{studentId}")]
+        public async Task<IActionResult> UpdateStudent(string studentId, [FromBody] StudentUpdateDto dto)
+        {
+            var student = await _repository.GetByIdAsync(studentId);
+            if (student == null) return NotFound("Student not found");
+
+            student.FullName = dto.FullName;
+            student.DateOfBirth = dto.DateOfBirth;
+            student.Email = dto.Email;
+            student.Phone = dto.Phone;
+            student.Address = dto.Address;
+
+            await _repository.UpdateAsync(student);
+            return Ok("Update student successful");
+        }
+
+        [HttpDelete("{studentId}")]
+        public async Task<IActionResult> DeleteStudent(string studentId)
+        {
+            var student = await _repository.GetByIdAsync(studentId);
+            if (student == null)
+                return NotFound("Student not found");
+
+            await _repository.DeleteAsync(studentId);
+            return Ok("Detele student successful");
+        }
+
+        [HttpPut("{studentId}/change-password")]
+        public async Task<IActionResult> ChangePassword(string studentId, [FromBody] ChangePasswordDto dto)
+        {
+            var student = await _repository.GetByIdAsync(studentId);
+            if (student == null) return NotFound("Student not found.");
+
+            if (student.Password != dto.CurrentPassword)
+            {
+                return BadRequest("Current password is incorrect.");
+            }
+
+            student.Password = dto.NewPassword;
+            await _repository.UpdateAsync(student);
+
+            return Ok("Password updated successfully.");
         }
 
         [HttpGet("{studentId}/class-subjects")]
@@ -82,7 +146,7 @@ namespace NET_BE.Controllers
                 .Select(cs => new EnrolledClassSubjectDto
                 {
                     ClassSubjectId = cs.ClassSubjectId,
-                    SubjectName = subjects.FirstOrDefault(s => s.SubjectId == cs.SubjectId)?.Name
+                    SubjectName = subjects.FirstOrDefault(s => s.SubjectId == cs.SubjectId)?.Name,
                 })
                 .ToList();
 
@@ -107,8 +171,12 @@ namespace NET_BE.Controllers
                 .Where(s => classSubjectIds.Contains(s.ClassSubjectId))
                 .Select(s =>
                 {
-                    var classSubject = classSubjects.FirstOrDefault(cs => cs.ClassSubjectId == s.ClassSubjectId);
-                    var subject = subjects.FirstOrDefault(sub => sub.SubjectId == classSubject?.SubjectId);
+                    var classSubject = classSubjects.FirstOrDefault(cs =>
+                        cs.ClassSubjectId == s.ClassSubjectId
+                    );
+                    var subject = subjects.FirstOrDefault(sub =>
+                        sub.SubjectId == classSubject?.SubjectId
+                    );
                     var lecturer = lecturers.FirstOrDefault(l => l.LecturerId == s.LecturerId);
 
                     return new
@@ -118,7 +186,7 @@ namespace NET_BE.Controllers
                         s.TimeSlot,
                         classSubject?.ClassSubjectId,
                         SubjectName = subject?.Name,
-                        LecturerName = lecturer?.FullName
+                        LecturerName = lecturer?.FullName,
                     };
                 })
                 .ToList();
@@ -139,8 +207,12 @@ namespace NET_BE.Controllers
                 .Select(a =>
                 {
                     var schedule = schedules.FirstOrDefault(s => s.ScheduleId == a.ScheduleId);
-                    var classSubject = classSubjects.FirstOrDefault(cs => cs.ClassSubjectId == schedule?.ClassSubjectId);
-                    var subject = subjects.FirstOrDefault(sub => sub.SubjectId == classSubject?.SubjectId);
+                    var classSubject = classSubjects.FirstOrDefault(cs =>
+                        cs.ClassSubjectId == schedule?.ClassSubjectId
+                    );
+                    var subject = subjects.FirstOrDefault(sub =>
+                        sub.SubjectId == classSubject?.SubjectId
+                    );
 
                     return new
                     {
@@ -150,14 +222,12 @@ namespace NET_BE.Controllers
                         schedule?.Date,
                         schedule?.TimeSlot,
                         classSubject?.ClassSubjectId,
-                        SubjectName = subject?.Name
+                        SubjectName = subject?.Name,
                     };
                 })
                 .ToList();
 
             return Ok(studentAttendances);
         }
-
-
     }
 }

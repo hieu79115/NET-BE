@@ -27,6 +27,11 @@ namespace NET_BE.Repositories
             return new PagedModel<T>(totalCount, data, pageIndex, pageSize);
         }
 
+        public async Task<IEnumerable<T>> GetAllAsync()
+        {
+            return await _context.Set<T>().ToListAsync();
+        }
+
         public async Task<T?> GetByIdAsync(string id)
         {
             return await _context.Set<T>().FindAsync(id);

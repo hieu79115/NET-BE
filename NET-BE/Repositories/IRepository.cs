@@ -5,6 +5,7 @@ namespace NET_BE.Repositories
     public interface IRepository<T> where T : class
     {
         Task<PagedModel<T>> GetPagedAsync(int pageIndex, int pageSize);
+        Task<IEnumerable<T>> GetAllAsync();
         Task<T?> GetByIdAsync(string id);
         Task AddAsync(T entity);
         Task UpdateAsync(T entity);

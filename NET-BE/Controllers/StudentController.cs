@@ -39,11 +39,39 @@ namespace NET_BE.Controllers
             _lecturerRepository = lectureRepository;
         }
 
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+        {
+            var students = await _repository.GetAllAsync();
+
+            var student = students.FirstOrDefault(s =>
+                s.Email.Equals(dto.Email, StringComparison.OrdinalIgnoreCase)
+                && s.Password == dto.Password
+            );
+
+            if (student == null)
+            {
+                return Unauthorized("Invalid email or password.");
+            }
+
+            var studentDto = new StudentDto
+            {
+                StudentId = student.StudentId,
+                FullName = student.FullName,
+                Email = student.Email,
+                Phone = student.Phone,
+                Address = student.Address,
+                DateOfBirth = student.DateOfBirth,
+            };
+
+            return Ok(studentDto);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetPaged(
-     [FromQuery] int pageIndex = 1,
-     [FromQuery] int pageSize = 10
- )
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10
+        )
         {
             var result = await _repository.GetPagedAsync(pageIndex, pageSize);
 
@@ -56,7 +84,7 @@ namespace NET_BE.Controllers
                     DateOfBirth = student.DateOfBirth,
                     Email = student.Email,
                     Phone = student.Phone,
-                    Address = student.Address
+                    Address = student.Address,
                 }),
                 result.PageIndex,
                 result.PageSize
@@ -86,14 +114,17 @@ namespace NET_BE.Controllers
         }
 
         [HttpPut("{studentId}")]
-        public async Task<IActionResult> UpdateStudent(string studentId, [FromBody] StudentUpdateDto dto)
+        public async Task<IActionResult> UpdateStudent(
+            string studentId,
+            [FromBody] StudentUpdateDto dto
+        )
         {
             var student = await _repository.GetByIdAsync(studentId);
-            if (student == null) return NotFound("Student not found");
+            if (student == null)
+                return NotFound("Student not found");
 
             student.FullName = dto.FullName;
             student.DateOfBirth = dto.DateOfBirth;
-            student.Email = dto.Email;
             student.Phone = dto.Phone;
             student.Address = dto.Address;
 
@@ -113,10 +144,14 @@ namespace NET_BE.Controllers
         }
 
         [HttpPut("{studentId}/change-password")]
-        public async Task<IActionResult> ChangePassword(string studentId, [FromBody] ChangePasswordDto dto)
+        public async Task<IActionResult> ChangePassword(
+            string studentId,
+            [FromBody] ChangePasswordDto dto
+        )
         {
             var student = await _repository.GetByIdAsync(studentId);
-            if (student == null) return NotFound("Student not found.");
+            if (student == null)
+                return NotFound("Student not found.");
 
             if (student.Password != dto.CurrentPassword)
             {

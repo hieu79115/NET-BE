@@ -31,9 +31,15 @@ namespace NET_BE.Controllers
 
             var dto = new LecturerDto
             {
-                LectureId = lecturer.LecturerId,
+                LecturerId = lecturer.LecturerId,
                 FullName = lecturer.FullName,
-                Email = lecturer.Email
+                Email = lecturer.Email,
+                PhoneNumber = lecturer.PhoneNumber,
+                Gender = lecturer.Gender,
+                DateOfBirth = lecturer.DateOfBirth,
+                Department = lecturer.Department,
+                AcademicTitle = lecturer.AcademicTitle,
+                Degree = lecturer.Degree,
             };
 
             return Ok(new { Message = "Successful", Lecturer = dto });
@@ -47,9 +53,27 @@ namespace NET_BE.Controllers
 
             lecturer.FullName = dto.FullName;
             lecturer.Email = dto.Email;
+            lecturer.PhoneNumber = dto.PhoneNumber;
+            lecturer.Gender = dto.Gender;
+            lecturer.DateOfBirth = dto.DateOfBirth;
+            lecturer.Department = dto.Department;
+            lecturer.AcademicTitle = dto.AcademicTitle;
+            lecturer.Degree = dto.Degree;
 
             await _repository.UpdateAsync(lecturer);
-            return Ok(new { Message = "Update successful", Lecturer = lecturer });
+            var updatedDto = new LecturerDto
+            {
+                LecturerId = lecturer.LecturerId,
+                FullName = lecturer.FullName,
+                Email = lecturer.Email,
+                PhoneNumber = lecturer.PhoneNumber,
+                Gender = lecturer.Gender,
+                DateOfBirth = lecturer.DateOfBirth,
+                Department = lecturer.Department,
+                AcademicTitle = lecturer.AcademicTitle,
+                Degree = lecturer.Degree,
+            };
+            return Ok(new { Message = "Update successful", Lecturer = updatedDto });
         }
     }
 }

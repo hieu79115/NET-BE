@@ -39,7 +39,7 @@ namespace NET_BE.Controllers
             return Ok(new { Message = "Successful", Lecturer = dto });
         }
 
-        [HttpPost("{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateLecturer(string id, [FromBody] LecturerUpdateDto dto)
         {
             var lecturer = await _repository.GetByIdAsync(id);

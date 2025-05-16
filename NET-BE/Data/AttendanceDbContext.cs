@@ -8,7 +8,7 @@ namespace NET_BE.Data
         public AttendanceDbContext(DbContextOptions<AttendanceDbContext> options) : base(options) { }
 
         public DbSet<Student> Students => Set<Student>();
-        public DbSet<Class> Classes => Set<Class>();
+        public DbSet<Enrollment> Enrollments => Set<Enrollment>();
         public DbSet<Lecturer> Lecturers => Set<Lecturer>();
         public DbSet<Subject> Subjects => Set<Subject>();
         public DbSet<ClassSubject> ClassSubjects => Set<ClassSubject>();
@@ -20,45 +20,61 @@ namespace NET_BE.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // ClassSubject
-            modelBuilder.Entity<ClassSubject>()
-                .HasOne(cs => cs.Class)
-                .WithMany(c => c.ClassSubjects)
-                .HasForeignKey(cs => cs.ClassId);
-
+            // ClassSubject - Subject
             modelBuilder.Entity<ClassSubject>()
                 .HasOne(cs => cs.Subject)
                 .WithMany(s => s.ClassSubjects)
                 .HasForeignKey(cs => cs.SubjectId);
 
-            // Schedule
+            // ClassSubject - Lecturer
+            modelBuilder.Entity<ClassSubject>()
+                .HasOne(cs => cs.Lecturer)
+                .WithMany(l => l.ClassSubjects)
+                .HasForeignKey(cs => cs.LecturerId);
+
+            // Enrollment - Student
+            modelBuilder.Entity<Enrollment>()
+                .HasOne(e => e.Student)
+                .WithMany(s => s.Enrollments)
+                .HasForeignKey(e => e.StudentId);
+
+            // Enrollment - ClassSubject
+            modelBuilder.Entity<Enrollment>()
+                .HasOne(e => e.ClassSubject)
+                .WithMany(cs => cs.Enrollments)
+                .HasForeignKey(e => e.ClassSubjectId);
+
+            // Schedule - ClassSubject
             modelBuilder.Entity<Schedule>()
                 .HasOne(s => s.ClassSubject)
                 .WithMany(cs => cs.Schedules)
-                .HasForeignKey(s => s.ClassSubjectId);
-
+                .HasForeignKey(s => s.ClassSubjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+            // Schedule - Lecturer
             modelBuilder.Entity<Schedule>()
                 .HasOne(s => s.Lecturer)
                 .WithMany(l => l.Schedules)
-                .HasForeignKey(s => s.LecturerId);
-
-            // Attendance
+                .HasForeignKey(s => s.LecturerId)
+                .OnDelete(DeleteBehavior.Restrict);
+            // Attendance - Student
             modelBuilder.Entity<Attendance>()
                 .HasOne(a => a.Student)
                 .WithMany(s => s.Attendances)
                 .HasForeignKey(a => a.StudentId);
 
+            // Attendance - Schedule
             modelBuilder.Entity<Attendance>()
                 .HasOne(a => a.Schedule)
                 .WithMany(s => s.Attendances)
                 .HasForeignKey(a => a.ScheduleId);
 
-            // Grade
+            // Grade - Student
             modelBuilder.Entity<Grade>()
                 .HasOne(g => g.Student)
                 .WithMany()
                 .HasForeignKey(g => g.StudentId);
 
+            // Grade - ClassSubject
             modelBuilder.Entity<Grade>()
                 .HasOne(g => g.ClassSubject)
                 .WithMany()

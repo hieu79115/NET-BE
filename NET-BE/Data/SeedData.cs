@@ -29,100 +29,37 @@ public static class SeedData
 
     public static void Initialize(IServiceProvider serviceProvider)
     {
-        using (
-            var context = new AttendanceDbContext(
-                serviceProvider.GetRequiredService<DbContextOptions<AttendanceDbContext>>()
-            )
-        )
+        using (var context = new AttendanceDbContext(
+            serviceProvider.GetRequiredService<DbContextOptions<AttendanceDbContext>>()))
         {
-            // Return if DB has been seeded
-            if (context.Students.Any())
-            {
-                return;
-            }
+            if (context.Students.Any()) return;
 
-            // Initialize random instance
             var random = new Random();
 
-            var lastNames = new List<string>
-            {
-                "Nguyễn",
-                "Trần",
-                "Lê",
-                "Phạm",
-                "Hoàng",
-                "Huỳnh",
-                "Phan",
-                "Vũ",
-                "Đặng",
-                "Bùi",
-            };
-            var middleNames = new List<string>
-            {
-                "Văn",
-                "Thị",
-                "Hữu",
-                "Gia",
-                "Ngọc",
-                "Đức",
-                "Minh",
-                "Thanh",
-                "Thành",
-                "Anh",
-            };
-            var firstNames = new List<string>
-            {
-                "An",
-                "Bình",
-                "Chi",
-                "Dũng",
-                "Dung",
-                "Hà",
-                "Hùng",
-                "Khoa",
-                "Lan",
-                "Linh",
-                "Mai",
-                "Nam",
-                "Phúc",
-                "Quân",
-                "Thảo",
-                "Trang",
-                "Tuấn",
-                "Việt",
-                "Yến",
-                "Hải",
-            };
+            var lastNames = new List<string> { "Nguyễn", "Trần", "Lê", "Phạm", "Hoàng", "Huỳnh", "Phan", "Vũ", "Đặng", "Bùi" };
+            var middleNames = new List<string> { "Văn", "Thị", "Hữu", "Gia", "Ngọc", "Đức", "Minh", "Thanh", "Thành", "Anh" };
+            var firstNames = new List<string> { "An", "Bình", "Chi", "Dũng", "Dung", "Hà", "Hùng", "Khoa", "Lan", "Linh", "Mai", "Nam", "Phúc", "Quân", "Thảo", "Trang", "Tuấn", "Việt", "Yến", "Hải" };
 
-            // Seed Students (40 students)
+            // Seed students
             var students = new List<Student>();
             for (int i = 1; i <= 40; i++)
             {
                 string codeSuffix = i.ToString("D3");
-                string fullName =
-                    $"{lastNames[random.Next(lastNames.Count)]} "
-                    + $"{middleNames[random.Next(middleNames.Count)]} "
-                    + $"{firstNames[random.Next(firstNames.Count)]}";
-                students.Add(
-                    new Student
-                    {
-                        StudentId = $"48.01.104.{codeSuffix}",
-                        Email = $"4801104{codeSuffix}@student.hcmue.edu.vn",
-                        FullName = fullName,
-                        Phone = $"09{i.ToString("D8")}",
-                        Address = $"Address of {fullName}",
-                        Password = "123456",
-                        DateOfBirth = new DateTime(
-                            year: 2000 + random.Next(0, 5),
-                            month: random.Next(1, 13),
-                            day: random.Next(1, 29)
-                        ),
-                    }
-                );
+                string fullName = $"{lastNames[random.Next(lastNames.Count)]} {middleNames[random.Next(middleNames.Count)]} {firstNames[random.Next(firstNames.Count)]}";
+                students.Add(new Student
+                {
+                    StudentId = $"48.01.104.{codeSuffix}",
+                    Email = $"4801104{codeSuffix}@student.hcmue.edu.vn",
+                    FullName = fullName,
+                    Phone = $"09{i:D8}",
+                    Address = $"Address of {fullName}",
+                    Password = "123456",
+                    DateOfBirth = new DateTime(2000 + random.Next(0, 5), random.Next(1, 13), random.Next(1, 29))
+                });
             }
             context.Students.AddRange(students);
 
-            // Seed Subjects (8 subjects)
+            // Seed subjects
             var subjects = new List<Subject>
             {
                 new Subject { SubjectId = "Comp001", Name = "Nhập môn lập trình" },
@@ -136,185 +73,130 @@ public static class SeedData
             };
             context.Subjects.AddRange(subjects);
 
-            // Seed Classes (create classes for each subject)
-            var classes = new List<Class>();
-            foreach (var subject in subjects)
-            {
-                // Each subject has 3 classes
-                for (int i = 1; i <= 3; i++)
-                {
-                    classes.Add(
-                        new Class
-                        {
-                            ClassId = $"{subject.SubjectId}{i:D2}",
-                            ClassName = $"{subject.SubjectId}",
-                        }
-                    );
-                }
-            }
-            context.Classes.AddRange(classes);
+            // Seed lecturers
+            var academicTitles = new[] { "Thạc sĩ", "Tiến sĩ", "Phó Giáo sư", "Giáo sư" };
+            var degrees = new[] { "Cử nhân", "Thạc sĩ", "Tiến sĩ" };
+            var departments = new[] { "Công nghệ thông tin", "Kế toán", "Toán-Tin", "Giáo dục", "Điện tử" };
+            var genders = new[] { "Nam", "Nữ" };
 
-            // Seed Lecturers (10 lecturers)
             var lecturers = new List<Lecturer>();
             for (int i = 0; i < 10; i++)
             {
                 var fullName = $"{lastNames[random.Next(lastNames.Count)]} {middleNames[random.Next(middleNames.Count)]} {firstNames[random.Next(firstNames.Count)]}";
-                var lecturerId = $"LC{(i + 1).ToString("D3")}";
-                lecturers.Add(
-                    new Lecturer
-                    {
-                        LecturerId = lecturerId,
-                        FullName = fullName,
-                        Email = $"{RemoveDiacritics(fullName.ToLower().Replace(" ", ""))}@hcmue.edu.vn",
-                        Password = "123456",
-                    }
-                );
+                var lecturerId = $"LC{(i + 1):D3}";
+                var gender = genders[random.Next(genders.Length)];
+                var birthYear = 1975 + random.Next(0, 15);
+                var dob = new DateTime(birthYear, random.Next(1, 13), random.Next(1, 29));
+
+                lecturers.Add(new Lecturer
+                {
+                    LecturerId = lecturerId,
+                    FullName = fullName,
+                    Email = $"{RemoveDiacritics(fullName.ToLower().Replace(" ", ""))}@hcmue.edu.vn",
+                    Password = "123456",
+                    PhoneNumber = $"09{random.Next(10000000, 99999999)}",
+                    Gender = gender,
+                    DateOfBirth = dob,
+                    Department = departments[random.Next(departments.Length)],
+                    AcademicTitle = academicTitles[random.Next(academicTitles.Length)],
+                    Degree = degrees[random.Next(degrees.Length)]
+                });
             }
             context.Lecturers.AddRange(lecturers);
-
-            // Save changes to get IDs
             context.SaveChanges();
 
-            // Seed ClassSubjects (assign subjects to classes)
+            // Seed class subjects (lớp học phần)
             var classSubjects = new List<ClassSubject>();
-            foreach (var cls in classes)
+            var enrollments = new List<Enrollment>();
+            foreach (var subject in subjects)
             {
-                // Each class has 4-5 subjects
-                var subjectsForClass = subjects
-                    .OrderBy(x => Guid.NewGuid())
-                    .Take(random.Next(4, 6))
-                    .ToList();
-                foreach (var subject in subjectsForClass)
+                for (int i = 1; i <= 3; i++)
                 {
-                    classSubjects.Add(
-                        new ClassSubject
+                    var classSubjectId = $"{subject.SubjectId}{i:D2}";
+                    var lecturer = lecturers[random.Next(lecturers.Count)];
+
+                    var classSubject = new ClassSubject
+                    {
+                        ClassSubjectId = classSubjectId,
+                        SubjectId = subject.SubjectId,
+                        LecturerId = lecturer.LecturerId
+                    };
+                    classSubjects.Add(classSubject);
+
+                    // Ghi danh ngẫu nhiên 8 sinh viên cho mỗi lớp học phần
+                    var enrolledStudents = students.OrderBy(x => Guid.NewGuid()).Take(8).ToList();
+                    foreach (var student in enrolledStudents)
+                    {
+                        enrollments.Add(new Enrollment
                         {
-                            ClassSubjectId = $"CS{classSubjects.Count + 1:D3}",
-                            ClassId = cls.ClassId,
-                            SubjectId = subject.SubjectId,
-                        }
-                    );
+                            EnrollmentId = $"ENR{enrollments.Count + 1:D4}",
+                            ClassSubjectId = classSubjectId,
+                            StudentId = student.StudentId
+                        });
+                    }
                 }
             }
             context.ClassSubjects.AddRange(classSubjects);
+            context.Enrollments.AddRange(enrollments);
             context.SaveChanges();
 
-            // Seed Schedules
-            var schedules = new List<Schedule>();
-            var timeSlots = new[]
-            {
-                "7:30-9:00",
-                "9:10-10:40",
-                "10:50-12:20",
-                "12:50-14:20",
-                "14:30-16:00",
-                "16:10-17:40",
-            };
-
-            // Start date for schedules (2 months ago)
+            // Seed schedules (lịch học) dựa trên ClassSubject
+            var timeSlots = new[] { "7:30-9:00", "9:10-10:40", "10:50-12:20", "12:50-14:20", "14:30-16:00", "16:10-17:40" };
             var startDate = DateTime.Now.AddMonths(-2).Date;
-
+            var schedules = new List<Schedule>();
             foreach (var classSubject in classSubjects)
             {
-                // Create 10-15 schedules for each class-subject combination
                 var schedulesCount = random.Next(10, 16);
-                var lecturerForSubject = lecturers[random.Next(lecturers.Count)];
-
                 for (int i = 0; i < schedulesCount; i++)
                 {
-                    var scheduleDate = startDate.AddDays(i * 7); // Weekly schedule
+                    var scheduleDate = startDate.AddDays(i * 7);
                     var timeSlot = timeSlots[random.Next(timeSlots.Length)];
-
-                    schedules.Add(
-                        new Schedule
-                        {
-                            ScheduleId = $"SCH{schedules.Count + 1:D4}",
-                            ClassSubjectId = classSubject.ClassSubjectId,
-                            LecturerId = lecturerForSubject.LecturerId,
-                            Date = scheduleDate,
-                            TimeSlot = timeSlot,
-                        }
-                    );
+                    schedules.Add(new Schedule
+                    {
+                        ScheduleId = $"SCH{schedules.Count + 1:D4}",
+                        ClassSubjectId = classSubject.ClassSubjectId,
+                        LecturerId = classSubject.LecturerId,
+                        Date = scheduleDate,
+                        TimeSlot = timeSlot
+                    });
                 }
             }
             context.Schedules.AddRange(schedules);
             context.SaveChanges();
 
-            // Seed Attendances
+            // Seed attendance (chấm điểm danh)
             var attendances = new List<Attendance>();
-
-            // Assign students to classes (8 students per class)
-            var studentsPerClass = 8;
-            for (int i = 0; i < classes.Count; i++)
+            foreach (var schedule in schedules)
             {
-                var classId = classes[i].ClassId;
-                var classStudents = students
-                    .Skip(i * studentsPerClass)
-                    .Take(studentsPerClass)
-                    .ToList();
-
-                // Find schedules for this class
-                var classSchedules = schedules
-                    .Where(s =>
-                        classSubjects.Any(cs =>
-                            cs.ClassSubjectId == s.ClassSubjectId && cs.ClassId == classId
-
-                        )
-                    )
-                    .ToList();
-
-                foreach (var schedule in classSchedules)
+                var enrolledStudentIds = enrollments.Where(e => e.ClassSubjectId == schedule.ClassSubjectId).Select(e => e.StudentId).ToList();
+                foreach (var studentId in enrolledStudentIds)
                 {
-                    // For each student in this class
-                    foreach (var student in classStudents)
+                    bool isPresent = random.NextDouble() < 0.85;
+                    if (isPresent)
                     {
-                        // 85% chance of being present
-                        bool isPresent = random.NextDouble() < 0.85;
+                        var scheduledTime = DateTime.Parse(schedule.TimeSlot.Split('-')[0]);
+                        var checkInTime = new DateTime(schedule.Date.Year, schedule.Date.Month, schedule.Date.Day, scheduledTime.Hour, scheduledTime.Minute, 0).AddMinutes(-random.Next(0, 30));
 
-                        // If present, create attendance record
-                        if (isPresent)
+                        attendances.Add(new Attendance
                         {
-                            var scheduledTime = DateTime.Parse(schedule.TimeSlot.Split('-')[0]);
-                            var baseHour = scheduledTime.Hour;
-                            var baseMinute = scheduledTime.Minute;
-
-                            // Check-in time (random within 30 minutes before class start)
-                            var checkInTime = new DateTime(
-                                schedule.Date.Year,
-                                schedule.Date.Month,
-                                schedule.Date.Day,
-                                baseHour,
-                                baseMinute,
-                                0
-                            ).AddMinutes(-random.Next(0, 30));
-
-                            attendances.Add(
-                                new Attendance
-                                {
-                                    AttendanceId = $"ATT{attendances.Count + 1:D5}",
-                                    StudentId = student.StudentId,
-                                    ScheduleId = schedule.ScheduleId,
-                                    Status = AttendanceStatus.Present,
-                                    DateTime = checkInTime,
-                                }
-                            );
-                        }
-                        else
+                            AttendanceId = $"ATT{attendances.Count + 1:D5}",
+                            StudentId = studentId,
+                            ScheduleId = schedule.ScheduleId,
+                            Status = AttendanceStatus.Present,
+                            DateTime = checkInTime
+                        });
+                    }
+                    else
+                    {
+                        var status = (AttendanceStatus)random.Next(1, 3);
+                        attendances.Add(new Attendance
                         {
-                            // Randomize attendance status
-                            var status = (AttendanceStatus)random.Next(1, 3); // 1: Absent, 2: ExcusedAbsence
-
-                            attendances.Add(
-                                new Attendance
-                                {
-                                    AttendanceId = $"ATT{attendances.Count + 1:D5}",
-                                    StudentId = student.StudentId,
-                                    ScheduleId = schedule.ScheduleId,
-                                    Status = status,
-                                    DateTime = DateTime.MinValue, // Default for non-present statuses
-                                }
-                            );
-                        }
+                            AttendanceId = $"ATT{attendances.Count + 1:D5}",
+                            StudentId = studentId,
+                            ScheduleId = schedule.ScheduleId,
+                            Status = status,
+                            DateTime = DateTime.MinValue
+                        });
                     }
                 }
             }

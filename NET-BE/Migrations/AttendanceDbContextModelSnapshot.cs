@@ -50,27 +50,12 @@ namespace NET_BE.Migrations
                     b.ToTable("Attendances");
                 });
 
-            modelBuilder.Entity("NET_BE.Model.Class", b =>
-                {
-                    b.Property<string>("ClassId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ClassName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("ClassId");
-
-                    b.ToTable("Classes");
-                });
-
             modelBuilder.Entity("NET_BE.Model.ClassSubject", b =>
                 {
                     b.Property<string>("ClassSubjectId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("ClassId")
+                    b.Property<string>("LecturerId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
@@ -80,11 +65,33 @@ namespace NET_BE.Migrations
 
                     b.HasKey("ClassSubjectId");
 
-                    b.HasIndex("ClassId");
+                    b.HasIndex("LecturerId");
 
                     b.HasIndex("SubjectId");
 
                     b.ToTable("ClassSubjects");
+                });
+
+            modelBuilder.Entity("NET_BE.Model.Enrollment", b =>
+                {
+                    b.Property<string>("EnrollmentId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ClassSubjectId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("StudentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("EnrollmentId");
+
+                    b.HasIndex("ClassSubjectId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("Enrollments");
                 });
 
             modelBuilder.Entity("NET_BE.Model.Grade", b =>
@@ -117,6 +124,21 @@ namespace NET_BE.Migrations
                     b.Property<string>("LecturerId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("AcademicTitle")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Degree")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Department")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -127,10 +149,18 @@ namespace NET_BE.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("Gender")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
 
                     b.HasKey("LecturerId");
 
@@ -241,9 +271,9 @@ namespace NET_BE.Migrations
 
             modelBuilder.Entity("NET_BE.Model.ClassSubject", b =>
                 {
-                    b.HasOne("NET_BE.Model.Class", "Class")
+                    b.HasOne("NET_BE.Model.Lecturer", "Lecturer")
                         .WithMany("ClassSubjects")
-                        .HasForeignKey("ClassId")
+                        .HasForeignKey("LecturerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -253,9 +283,28 @@ namespace NET_BE.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Class");
+                    b.Navigation("Lecturer");
 
                     b.Navigation("Subject");
+                });
+
+            modelBuilder.Entity("NET_BE.Model.Enrollment", b =>
+                {
+                    b.HasOne("NET_BE.Model.ClassSubject", "ClassSubject")
+                        .WithMany("Enrollments")
+                        .HasForeignKey("ClassSubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NET_BE.Model.Student", "Student")
+                        .WithMany("Enrollments")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ClassSubject");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("NET_BE.Model.Grade", b =>
@@ -288,7 +337,7 @@ namespace NET_BE.Migrations
                     b.HasOne("NET_BE.Model.Lecturer", "Lecturer")
                         .WithMany("Schedules")
                         .HasForeignKey("LecturerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("ClassSubject");
@@ -296,18 +345,17 @@ namespace NET_BE.Migrations
                     b.Navigation("Lecturer");
                 });
 
-            modelBuilder.Entity("NET_BE.Model.Class", b =>
-                {
-                    b.Navigation("ClassSubjects");
-                });
-
             modelBuilder.Entity("NET_BE.Model.ClassSubject", b =>
                 {
+                    b.Navigation("Enrollments");
+
                     b.Navigation("Schedules");
                 });
 
             modelBuilder.Entity("NET_BE.Model.Lecturer", b =>
                 {
+                    b.Navigation("ClassSubjects");
+
                     b.Navigation("Schedules");
                 });
 
@@ -319,6 +367,8 @@ namespace NET_BE.Migrations
             modelBuilder.Entity("NET_BE.Model.Student", b =>
                 {
                     b.Navigation("Attendances");
+
+                    b.Navigation("Enrollments");
                 });
 
             modelBuilder.Entity("NET_BE.Model.Subject", b =>

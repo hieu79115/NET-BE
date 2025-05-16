@@ -29,6 +29,7 @@ namespace NET_BE.Model
         [MaxLength(100)]
         public string Password { get; set; }
 
+        public ICollection<Enrollment> Enrollments { get; set; }
         public ICollection<Attendance> Attendances { get; set; }
 
     }

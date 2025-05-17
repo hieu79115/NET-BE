@@ -81,6 +81,15 @@ namespace NET_BE.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<double?>("FinalScore")
+                        .HasColumnType("float");
+
+                    b.Property<double>("FinalWeight")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("MidtermScore")
+                        .HasColumnType("float");
+
                     b.Property<string>("StudentId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -92,31 +101,6 @@ namespace NET_BE.Migrations
                     b.HasIndex("StudentId");
 
                     b.ToTable("Enrollments");
-                });
-
-            modelBuilder.Entity("NET_BE.Model.Grade", b =>
-                {
-                    b.Property<string>("GradeId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ClassSubjectId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<double>("Score")
-                        .HasColumnType("float");
-
-                    b.Property<string>("StudentId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("GradeId");
-
-                    b.HasIndex("ClassSubjectId");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("Grades");
                 });
 
             modelBuilder.Entity("NET_BE.Model.Lecturer", b =>
@@ -298,25 +282,6 @@ namespace NET_BE.Migrations
 
                     b.HasOne("NET_BE.Model.Student", "Student")
                         .WithMany("Enrollments")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ClassSubject");
-
-                    b.Navigation("Student");
-                });
-
-            modelBuilder.Entity("NET_BE.Model.Grade", b =>
-                {
-                    b.HasOne("NET_BE.Model.ClassSubject", "ClassSubject")
-                        .WithMany()
-                        .HasForeignKey("ClassSubjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("NET_BE.Model.Student", "Student")
-                        .WithMany()
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

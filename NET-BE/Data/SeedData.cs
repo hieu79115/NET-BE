@@ -127,11 +127,18 @@ public static class SeedData
                     var enrolledStudents = students.OrderBy(x => Guid.NewGuid()).Take(8).ToList();
                     foreach (var student in enrolledStudents)
                     {
+                        var midtermScore = Math.Round(random.NextDouble() * 10, 2); // 0.00 - 10.00
+                        var finalScore = Math.Round(random.NextDouble() * 10, 2);
+                        var finalWeight = random.Next(0, 2) == 0 ? 0.6 : 0.5;
+
                         enrollments.Add(new Enrollment
                         {
                             EnrollmentId = $"ENR{enrollments.Count + 1:D4}",
                             ClassSubjectId = classSubjectId,
-                            StudentId = student.StudentId
+                            StudentId = student.StudentId,
+                            MidtermScore = midtermScore,
+                            FinalScore = finalScore,
+                            FinalWeight = finalWeight
                         });
                     }
                 }

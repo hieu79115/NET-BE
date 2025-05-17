@@ -14,7 +14,6 @@ namespace NET_BE.Data
         public DbSet<ClassSubject> ClassSubjects => Set<ClassSubject>();
         public DbSet<Schedule> Schedules => Set<Schedule>();
         public DbSet<Attendance> Attendances => Set<Attendance>();
-        public DbSet<Grade> Grades => Set<Grade>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -67,18 +66,6 @@ namespace NET_BE.Data
                 .HasOne(a => a.Schedule)
                 .WithMany(s => s.Attendances)
                 .HasForeignKey(a => a.ScheduleId);
-
-            // Grade - Student
-            modelBuilder.Entity<Grade>()
-                .HasOne(g => g.Student)
-                .WithMany()
-                .HasForeignKey(g => g.StudentId);
-
-            // Grade - ClassSubject
-            modelBuilder.Entity<Grade>()
-                .HasOne(g => g.ClassSubject)
-                .WithMany()
-                .HasForeignKey(g => g.ClassSubjectId);
         }
 
     }

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using NET_BE.DTOs;
 using NET_BE.Model;
 using NET_BE.Repositories;
+using System.Security.Claims;
 
 namespace NET_BE.Controllers
 {
@@ -117,9 +118,13 @@ namespace NET_BE.Controllers
             return Ok("Detele student successful");
         }
 
-        [HttpGet("{studentId}/class-subjects")]
-        public async Task<IActionResult> GetEnrolledClassSubjects(string studentId)
+        [HttpGet("class-subjects")]
+        public async Task<IActionResult> GetEnrolledClassSubjects()
         {
+            string studentId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(studentId))
+                return Unauthorized("Invalid token");
+
             var enrollments = await _enrollmentRepository.GetAllAsync();
             var classSubjectIds = enrollments
                 .Where(e => e.StudentId == studentId)
@@ -141,9 +146,13 @@ namespace NET_BE.Controllers
             return Ok(result);
         }
 
-        [HttpGet("{studentId}/schedules")]
-        public async Task<IActionResult> GetSchedulesByStudent(string studentId)
+        [HttpGet("schedules")]
+        public async Task<IActionResult> GetSchedulesByStudent()
         {
+            string studentId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(studentId))
+                return Unauthorized("Invalid token");
+
             var enrollments = await _enrollmentRepository.GetAllAsync();
             var classSubjectIds = enrollments
                 .Where(e => e.StudentId == studentId)
@@ -182,9 +191,13 @@ namespace NET_BE.Controllers
             return Ok(studentSchedules);
         }
 
-        [HttpGet("{studentId}/attendances")]
-        public async Task<IActionResult> GetStudentAttendances(string studentId)
+        [HttpGet("attendances")]
+        public async Task<IActionResult> GetStudentAttendances()
         {
+            string studentId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(studentId))
+                return Unauthorized("Invalid token");
+
             var attendances = await _attendanceRepository.GetAllAsync();
             var schedules = await _scheduleRepository.GetAllAsync();
             var classSubjects = await _classSubjectRepository.GetAllAsync();

@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NET_BE.DTOs;
 using NET_BE.Model;
 using NET_BE.Repositories;
 
 namespace NET_BE.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class LectureController : Controller

@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using NET_BE.Model;
 
 namespace NET_BE.Data
 {
-    public class AttendanceDbContext : DbContext
+    public class AttendanceDbContext : IdentityDbContext<ApplicationUser>
     {
         public AttendanceDbContext(DbContextOptions<AttendanceDbContext> options) : base(options) { }
 

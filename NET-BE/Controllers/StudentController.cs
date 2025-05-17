@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NET_BE.DTOs;
 using NET_BE.Model;
@@ -8,6 +9,7 @@ using NET_BE.Repositories;
 
 namespace NET_BE.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class StudentController : ControllerBase
@@ -37,34 +39,6 @@ namespace NET_BE.Controllers
             _classSubjectRepository = classSubjectRepository;
             _subjectRepository = subjectRepository;
             _lecturerRepository = lectureRepository;
-        }
-
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto dto)
-        {
-            var students = await _repository.GetAllAsync();
-
-            var student = students.FirstOrDefault(s =>
-                s.Email.Equals(dto.Email, StringComparison.OrdinalIgnoreCase)
-                && s.Password == dto.Password
-            );
-
-            if (student == null)
-            {
-                return Unauthorized("Invalid email or password.");
-            }
-
-            var studentDto = new StudentDto
-            {
-                StudentId = student.StudentId,
-                FullName = student.FullName,
-                Email = student.Email,
-                Phone = student.Phone,
-                Address = student.Address,
-                DateOfBirth = student.DateOfBirth,
-            };
-
-            return Ok(studentDto);
         }
 
         [HttpGet]
@@ -141,27 +115,6 @@ namespace NET_BE.Controllers
 
             await _repository.DeleteAsync(studentId);
             return Ok("Detele student successful");
-        }
-
-        [HttpPut("{studentId}/change-password")]
-        public async Task<IActionResult> ChangePassword(
-            string studentId,
-            [FromBody] ChangePasswordDto dto
-        )
-        {
-            var student = await _repository.GetByIdAsync(studentId);
-            if (student == null)
-                return NotFound("Student not found.");
-
-            if (student.Password != dto.CurrentPassword)
-            {
-                return BadRequest("Current password is incorrect.");
-            }
-
-            student.Password = dto.NewPassword;
-            await _repository.UpdateAsync(student);
-
-            return Ok("Password updated successfully.");
         }
 
         [HttpGet("{studentId}/class-subjects")]

@@ -62,14 +62,14 @@ public static class SeedData
             // Seed subjects
             var subjects = new List<Subject>
             {
-                new Subject { SubjectId = "Comp001", Name = "Nhập môn lập trình" },
-                new Subject { SubjectId = "Comp002", Name = "Lập trình hướng đối tượng" },
-                new Subject { SubjectId = "Comp003", Name = "Hệ quản trị cơ sở dữ liệu" },
-                new Subject { SubjectId = "Comp004", Name = "Lập trình web" },
-                new Subject { SubjectId = "Comp005", Name = "Phát triển ứng dụng di động" },
-                new Subject { SubjectId = "Comp006", Name = "Cấu trúc dữ liệu và giải thuật" },
-                new Subject { SubjectId = "Comp007", Name = "Kỹ nghệ phần mềm" },
-                new Subject { SubjectId = "Comp008", Name = "Mạng máy tính" },
+                new Subject { SubjectId = "Comp001", Name = "Nhập môn lập trình", FinalWeight = 0.6, Credits = 3 },
+                new Subject { SubjectId = "Comp002", Name = "Lập trình hướng đối tượng", FinalWeight = 0.6, Credits = 3 },
+                new Subject { SubjectId = "Comp003", Name = "Hệ quản trị cơ sở dữ liệu", FinalWeight = 0.6, Credits = 3 },
+                new Subject { SubjectId = "Comp004", Name = "Lập trình web", FinalWeight = 0.6, Credits = 3 },
+                new Subject { SubjectId = "Comp005", Name = "Phát triển ứng dụng di động", FinalWeight = 0.6, Credits = 3 },
+                new Subject { SubjectId = "Comp006", Name = "Cấu trúc dữ liệu và giải thuật", FinalWeight = 0.6, Credits = 3 },
+                new Subject { SubjectId = "Comp007", Name = "Kỹ nghệ phần mềm", FinalWeight = 0.6, Credits = 3 },
+                new Subject { SubjectId = "Comp008", Name = "Mạng máy tính", FinalWeight = 0.6, Credits = 3 },
             };
             context.Subjects.AddRange(subjects);
 
@@ -138,7 +138,6 @@ public static class SeedData
                             StudentId = student.StudentId,
                             MidtermScore = midtermScore,
                             FinalScore = finalScore,
-                            FinalWeight = finalWeight
                         });
                     }
                 }

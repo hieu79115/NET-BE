@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace NET_BE.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class ClassSubjectController : ControllerBase

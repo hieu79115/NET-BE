@@ -9,16 +9,20 @@ using System.Threading.Tasks;
 
 namespace NET_BE.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class EnrollmentController : ControllerBase
     {
         private readonly IRepository<Enrollment> _repository;
+        private readonly IRepository<Student> _studentRepository;
 
-        public EnrollmentController(IRepository<Enrollment> repository)
+        public EnrollmentController(
+            IRepository<Enrollment> repository,
+            IRepository<Student> studentRepository
+        )
         {
             _repository = repository;
+            _studentRepository = studentRepository;
         }
 
         [HttpGet]
@@ -89,22 +93,36 @@ namespace NET_BE.Controllers
                     FinalScore = e.FinalScore
                 }).ToList();
             return Ok(result);
-        }
-
-        [HttpGet("by-class/{classSubjectId}")]
+        }        [HttpGet("by-class/{classSubjectId}")]
         public async Task<IActionResult> GetByClass(string classSubjectId)
         {
             var enrollments = await _repository.GetAllAsync();
+            var students = await _studentRepository.GetAllAsync();
+            
             var result = enrollments
                 .Where(e => e.ClassSubjectId == classSubjectId)
-                .Select(e => new EnrollmentDto
-                {
-                    EnrollmentId = e.EnrollmentId,
-                    StudentId = e.StudentId,
-                    ClassSubjectId = e.ClassSubjectId,
-                    MidtermScore = e.MidtermScore,
-                    FinalScore = e.FinalScore
+                .Select(e => {
+                    var student = students.FirstOrDefault(s => s.StudentId == e.StudentId);
+                    return new 
+                    {
+                        Enrollment = new EnrollmentDto
+                        {
+                            EnrollmentId = e.EnrollmentId,
+                            StudentId = e.StudentId,
+                            ClassSubjectId = e.ClassSubjectId,
+                            MidtermScore = e.MidtermScore,
+                            FinalScore = e.FinalScore,
+                        },
+                        Student = student != null ? new
+                        {
+                            student.StudentId,
+                            student.FullName,
+                            student.Email,
+                            student.Phone
+                        } : null
+                    };
                 }).ToList();
+            
             return Ok(result);
         }
     }

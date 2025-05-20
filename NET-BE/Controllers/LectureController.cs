@@ -5,10 +5,10 @@ using NET_BE.Model;
 using NET_BE.Repositories;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace NET_BE.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class LectureController : Controller
@@ -175,7 +175,7 @@ namespace NET_BE.Controllers
                 StudentId = dto.StudentId,
                 ScheduleId = dto.ScheduleId,
                 Status = dto.Status,
-                DateTime = DateTime.Now
+                DateTime = DateTime.Now,
             };
 
             await _attendanceRepository.AddAsync(attendance);

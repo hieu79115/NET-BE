@@ -1,16 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NET_BE.DTOs;
 using NET_BE.Model;
 using NET_BE.Repositories;
-using System.Security.Claims;
 
 namespace NET_BE.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class StudentController : ControllerBase
@@ -88,6 +87,7 @@ namespace NET_BE.Controllers
             return Ok(dto);
         }
 
+        [Authorize(Roles = "Student")]
         [HttpPut("{studentId}")]
         public async Task<IActionResult> UpdateStudent(
             string studentId,

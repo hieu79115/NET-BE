@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace NET_BE.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Lecturer,Student")]
     [ApiController]
     [Route("api/[controller]")]
     public class ScheduleController : ControllerBase

@@ -125,14 +125,16 @@ namespace NET_BE.Controllers
                 TimeSlot = dto.TimeSlot
             };
             await _repository.AddAsync(schedule);
-            return Ok(new ScheduleDto
+            var result = new ScheduleDto
             {
                 ScheduleId = schedule.ScheduleId,
                 ClassSubjectId = schedule.ClassSubjectId,
                 LecturerId = schedule.LecturerId,
                 Date = schedule.Date,
                 TimeSlot = schedule.TimeSlot
-            });
+            };
+
+            return Ok(result);
         }
 
         [HttpPut("{id}")]

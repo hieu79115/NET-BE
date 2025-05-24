@@ -80,9 +80,6 @@ namespace NET_BE.Controllers
             lecturer.PhoneNumber = dto.PhoneNumber;
             lecturer.Gender = dto.Gender;
             lecturer.DateOfBirth = dto.DateOfBirth;
-            lecturer.Department = dto.Department;
-            lecturer.AcademicTitle = dto.AcademicTitle;
-            lecturer.Degree = dto.Degree;
 
             await _repository.UpdateAsync(lecturer);
 

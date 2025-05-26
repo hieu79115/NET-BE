@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NET_BE.Data;
 using NET_BE.Model;
+using NET_BE.Helpers;
 
 public static class SeedData
 {
@@ -45,15 +46,13 @@ public static class SeedData
             for (int i = 1; i <= 40; i++)
             {
                 string codeSuffix = i.ToString("D3");
-                string fullName = $"{lastNames[random.Next(lastNames.Count)]} {middleNames[random.Next(middleNames.Count)]} {firstNames[random.Next(firstNames.Count)]}";
-                students.Add(new Student
-                {
-                    StudentId = $"48.01.104.{codeSuffix}",
+                string fullName = $"{lastNames[random.Next(lastNames.Count)]} {middleNames[random.Next(middleNames.Count)]} {firstNames[random.Next(firstNames.Count)]}";                students.Add(new Student
+                {                    StudentId = $"48.01.104.{codeSuffix}",
                     Email = $"4801104{codeSuffix}@student.hcmue.edu.vn",
                     FullName = fullName,
                     Phone = $"09{i:D8}",
                     Address = $"Address of {fullName}",
-                    Password = "123456",
+                    Password = PasswordHelper.HashPassword("123456"),
                     DateOfBirth = new DateTime(2000 + random.Next(0, 5), random.Next(1, 13), random.Next(1, 29))
                 });
             }
@@ -89,11 +88,10 @@ public static class SeedData
                 var dob = new DateTime(birthYear, random.Next(1, 13), random.Next(1, 29));
 
                 lecturers.Add(new Lecturer
-                {
-                    LecturerId = lecturerId,
+                {                    LecturerId = lecturerId,
                     FullName = fullName,
                     Email = $"{RemoveDiacritics(fullName.ToLower().Replace(" ", ""))}@hcmue.edu.vn",
-                    Password = "123456",
+                    Password = PasswordHelper.HashPassword("123456"),
                     PhoneNumber = $"09{random.Next(10000000, 99999999)}",
                     Gender = gender,
                     DateOfBirth = dob,
@@ -148,23 +146,62 @@ public static class SeedData
 
             // Seed schedules (lịch học) dựa trên ClassSubject
             var timeSlots = new[] { "7:30-9:00", "9:10-10:40", "10:50-12:20", "12:50-14:20", "14:30-16:00", "16:10-17:40" };
+            var weekdays = new[] { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday };
             var startDate = DateTime.Now.AddMonths(-2).Date;
+            
+            // Điều chỉnh ngày bắt đầu đến ngày thứ Hai đầu tiên
+            while (startDate.DayOfWeek != DayOfWeek.Monday)
+                startDate = startDate.AddDays(1);
+                
+            // Dictionary để lưu lịch học của từng giảng viên, tránh trùng lịch
+            var lecturerSchedules = new Dictionary<string, HashSet<string>>();
+            
             var schedules = new List<Schedule>();
             foreach (var classSubject in classSubjects)
             {
-                var schedulesCount = random.Next(10, 16);
-                for (int i = 0; i < schedulesCount; i++)
+                // Mỗi lớp học có 2 buổi học mỗi tuần
+                var schedulesCount = random.Next(10, 16); // Số tuần học
+                
+                // Chọn ngẫu nhiên 2 ngày trong tuần cho lớp này
+                var classWeekdays = weekdays.OrderBy(x => random.Next()).Take(2).ToArray();
+                
+                // Chọn ngẫu nhiên khung giờ cố định cho lớp này
+                var classTimeSlots = timeSlots.OrderBy(x => random.Next()).Take(2).ToArray();
+                
+                if (!lecturerSchedules.ContainsKey(classSubject.LecturerId))
                 {
-                    var scheduleDate = startDate.AddDays(i * 7);
-                    var timeSlot = timeSlots[random.Next(timeSlots.Length)];
-                    schedules.Add(new Schedule
+                    lecturerSchedules[classSubject.LecturerId] = new HashSet<string>();
+                }
+                
+                for (int week = 0; week < schedulesCount; week++)
+                {
+                    // Tạo 2 buổi học mỗi tuần
+                    for (int day = 0; day < 2; day++)
                     {
-                        ScheduleId = $"SCH{schedules.Count + 1:D4}",
-                        ClassSubjectId = classSubject.ClassSubjectId,
-                        LecturerId = classSubject.LecturerId,
-                        Date = scheduleDate,
-                        TimeSlot = timeSlot
-                    });
+                        // Tính ngày học: ngày bắt đầu + số tuần * 7 + số ngày trong tuần
+                        var baseDate = startDate.AddDays(week * 7);
+                        var dayOffset = ((int)classWeekdays[day] - (int)DayOfWeek.Monday + 7) % 7;
+                        var scheduleDate = baseDate.AddDays(dayOffset);
+                        
+                        // Tạo khóa lịch để kiểm tra trùng
+                        var scheduleKey = $"{scheduleDate:yyyy-MM-dd}_{classTimeSlots[day]}";
+                        
+                        // Kiểm tra xem giảng viên đã có lịch vào khung giờ này chưa
+                        if (!lecturerSchedules[classSubject.LecturerId].Contains(scheduleKey))
+                        {
+                            schedules.Add(new Schedule
+                            {
+                                ScheduleId = $"SCH{schedules.Count + 1:D4}",
+                                ClassSubjectId = classSubject.ClassSubjectId,
+                                LecturerId = classSubject.LecturerId,
+                                Date = scheduleDate,
+                                TimeSlot = classTimeSlots[day]
+                            });
+                            
+                            // Đánh dấu rằng giảng viên đã có lịch vào khung giờ này
+                            lecturerSchedules[classSubject.LecturerId].Add(scheduleKey);
+                        }
+                    }
                 }
             }
             context.Schedules.AddRange(schedules);

@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
+using NET_BE.Helpers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -45,13 +46,13 @@ public class AuthController : ControllerBase
         string name = "";
         string userId = "";
 
-        var isStudentId = Regex.IsMatch(login.Username, @"^\d{2}\.\d{2}\.\d{3}\.\d{3}$");
-
-        if (isStudentId)
+        var isStudentId = Regex.IsMatch(login.Username, @"^\d{2}\.\d{2}\.\d{3}\.\d{3}$");        if (isStudentId)
         {
-            var student = _context.Students.FirstOrDefault(s =>
-                s.StudentId == login.Username && s.Password == login.Password);
+            var student = _context.Students.FirstOrDefault(s => s.StudentId == login.Username);
             if (student == null) return Unauthorized("Invalid credentials");
+              // Xác thực mật khẩu bằng BCrypt
+            if (!PasswordHelper.VerifyPassword(login.Password, student.Password))
+                return Unauthorized("Invalid credentials");
 
             user = student;
             role = "Student";
@@ -60,9 +61,11 @@ public class AuthController : ControllerBase
         }
         else if (login.Username.Contains("@"))
         {
-            var lecturer = _context.Lecturers.FirstOrDefault(l =>
-                l.Email == login.Username && l.Password == login.Password);
+            var lecturer = _context.Lecturers.FirstOrDefault(l => l.Email == login.Username);
             if (lecturer == null) return Unauthorized("Invalid credentials");
+              // Xác thực mật khẩu bằng BCrypt
+            if (!PasswordHelper.VerifyPassword(login.Password, lecturer.Password))
+                return Unauthorized("Invalid credentials");
 
             user = lecturer;
             role = "Lecturer";
@@ -72,11 +75,9 @@ public class AuthController : ControllerBase
         else
         {
             return BadRequest("Invalid username format");
-        }
-
-        // Generate JWT
+        }        // Generate JWT
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
+        var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? "default-key-if-null");
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(new[]
@@ -118,28 +119,61 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var role = User.FindFirstValue(ClaimTypes.Role);
-
-        if (role == "Student")
+        var role = User.FindFirstValue(ClaimTypes.Role);        if (role == "Student")
         {
             var student = _context.Students.FirstOrDefault(s => s.StudentId == userId);
-            if (student == null || student.Password != dto.CurrentPassword)
+            if (student == null)
+                return BadRequest("Student not found");
+              // Xác thực mật khẩu hiện tại bằng BCrypt
+            if (!PasswordHelper.VerifyPassword(dto.CurrentPassword, student.Password))
                 return BadRequest("Old password incorrect");
 
-            student.Password = dto.NewPassword;
+            // Mã hóa mật khẩu mới bằng BCrypt
+            student.Password = PasswordHelper.HashPassword(dto.NewPassword);
             _context.Students.Update(student);
         }
         else if (role == "Lecturer")
         {
             var lecturer = _context.Lecturers.FirstOrDefault(l => l.LecturerId == userId);
-            if (lecturer == null || lecturer.Password != dto.CurrentPassword)
+            if (lecturer == null)
+                return BadRequest("Lecturer not found");
+              // Xác thực mật khẩu hiện tại bằng BCrypt
+            if (!PasswordHelper.VerifyPassword(dto.CurrentPassword, lecturer.Password))
                 return BadRequest("Old password incorrect");
 
-            lecturer.Password = dto.NewPassword;
+            // Mã hóa mật khẩu mới bằng BCrypt
+            lecturer.Password = PasswordHelper.HashPassword(dto.NewPassword);
             _context.Lecturers.Update(lecturer);
         }
 
         await _context.SaveChangesAsync();
         return Ok("Password changed successfully");
+    }
+
+    [HttpPost("hash-all-passwords")]
+    public async Task<IActionResult> HashAllPasswords()
+    {
+        // Mã hóa mật khẩu cho sinh viên
+        var students = _context.Students.ToList();
+        foreach (var student in students)
+        {            // Kiểm tra xem mật khẩu đã được mã hóa chưa
+            if (!student.Password.StartsWith("$2"))
+            {
+                student.Password = PasswordHelper.HashPassword(student.Password);
+            }
+        }
+
+        // Mã hóa mật khẩu cho giảng viên
+        var lecturers = _context.Lecturers.ToList();
+        foreach (var lecturer in lecturers)
+        {            // Kiểm tra xem mật khẩu đã được mã hóa chưa
+            if (!lecturer.Password.StartsWith("$2"))
+            {
+                lecturer.Password = PasswordHelper.HashPassword(lecturer.Password);
+            }
+        }
+
+        await _context.SaveChangesAsync();
+        return Ok("All passwords have been hashed successfully");
     }
 }
